@@ -1,0 +1,25 @@
+FROM mistral:instruct
+
+# set the temperature to 0
+PARAMETER temperature 0
+PARAMETER seed 42
+PARAMETER num_predict 10
+PARAMETER num_ctx 512
+
+TEMPLATE """
+{{ .System }}
+{{ .Prompt }}
+"""
+
+SYSTEM """
+The user wants to know what will happen in the future about a certain event.
+Predict the outcome of the question within the preset options in the brackets.
+Respond in the format "outcome: <chosen outcome>".
+
+Here is an example of questions and answers:
+Fight Night: Will Yan win by finish? (2023-03-11) [Yes, No]
+Outcome: No
+
+Will Inter Miami win MLS Cup? [Yes, No]
+Outcome: No
+"""

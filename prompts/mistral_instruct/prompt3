@@ -1,0 +1,20 @@
+FROM mistral:instruct
+
+# set the temperature to 0
+PARAMETER temperature 0
+PARAMETER seed 42
+PARAMETER num_predict 10
+PARAMETER num_ctx 512
+
+TEMPLATE """
+{{ .System }} 
+{{ .Prompt }}
+"""
+
+# set the system message
+SYSTEM """
+You will receive a question followed by list of options.
+The question will be prefaced by "QUESTION:"
+The options will be prefaced by "OPTIONS:" and enclosed between []
+Guess which option is the most likely and answer with only the chosen option in the format "outcome: <chosen option>".
+"""

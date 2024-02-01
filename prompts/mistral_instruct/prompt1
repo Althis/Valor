@@ -1,0 +1,18 @@
+FROM mistral:instruct
+
+# set the temperature to 0
+PARAMETER temperature 0
+PARAMETER seed 42
+PARAMETER num_predict 10
+PARAMETER num_ctx 512
+
+TEMPLATE """
+{{ .System }} 
+{{ .Prompt }}
+"""
+
+# set the system message
+SYSTEM """
+You will receive a question about the future and a selection of possible outcomes enclosed between []
+Guess which outcome is more likely and answer in within the format "outcome: <chosen option>".
+"""
