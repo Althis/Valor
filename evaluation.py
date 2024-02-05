@@ -29,7 +29,7 @@ for file in os.listdir(directory):
 # Sort results by 'hits' and select top 10
 sorted_results = sorted(results.items(), key=lambda x: x[1][0], reverse=True)[:20]
 
-labels = [x[0].replace('.txt', ' ').replace('.csv', ' ').replace('form', ' ').replace('-output-', ' ').replace('questions', '') for x in sorted_results]
+labels = [x[0].replace('.txt', ' ').replace('f.csv', 'fewshot ').replace('.csv', ' ').replace('form', ' ').replace('-output-', ' ').replace('questions', '') for x in sorted_results]
 hits = [x[1][0] for x in sorted_results]
 mistakes = [x[1][1] for x in sorted_results]
 
@@ -91,14 +91,13 @@ for model_family in model_families:
             df = process_csv(os.path.join(directory, file))
             dfs.append(df)
     merged_df = pd.concat(dfs)
-    yes_no_df = merged_df[merged_df['response'].isin(['yes', 'no'])] 
+    yes_no_df = merged_df[merged_df['outcome'].str.lower().isin(['yes', 'no'])]
     if model_family not in model_family_yes_counts:
-        model_family_yes_counts[model_family] = yes_no_df[yes_no_df['response'] == 'yes'].shape[0]
+        model_family_yes_counts[model_family] = yes_no_df[yes_no_df['response'].str.contains('yes')].shape[0]
         model_family_total_counts[model_family] = yes_no_df.shape[0]
     else:
-        model_family_yes_counts[model_family] += yes_no_df[yes_no_df['response'] == 'yes'].shape[0]
+        model_family_yes_counts[model_family] += yes_no_df[yes_no_df['response'].str.contains('yes')].shape[0]
         model_family_total_counts[model_family] += yes_no_df.shape[0]
-
 model_family_yes_rate = {model_family: (yes_counts / model_family_total_counts[model_family]) if model_family_total_counts[model_family] != 0 else 0 for model_family, yes_counts in model_family_yes_counts.items()}
 sorted_model_family_yes_rate = sorted(model_family_yes_rate.items(), key=lambda x: x[1], reverse=True)
 
