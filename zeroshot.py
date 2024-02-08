@@ -23,8 +23,9 @@ for input_file, model_names in input_files.items():
         output = []
         # We will be reducing our analysis to just the first 100 lines
         # As otherwise, this task will not finish.
-        for line in tqdm(lines[:10]):
-            response = ollama.generate(model=model_name, prompt=line) 
+        for line in tqdm(lines[:100]):
+            response = ollama.generate(model=model_name, prompt=line)
+            respose = response['response'].replace('\n', '').replace('\r', '') 
             output.append({'response': response['response'], 'full_response': response})
 
         output_df = pd.DataFrame(output)
@@ -44,8 +45,9 @@ for input_file, model_names in input_files.items():
         model_name = f"{model_name}f"
         print(f"Processing {input_file} with {model_name}")
         output = []
-        for line in tqdm(lines[:10]):
-            response = ollama.generate(model=model_name, prompt=line) 
+        for line in tqdm(lines[:100]):
+            response = ollama.generate(model=model_name, prompt=line)
+            respose = response['response'].replace('\n', '').replace('\r', '')  
             output.append({'response': response['response'], 'full_response': response})
 
         output_df = pd.DataFrame(output)
