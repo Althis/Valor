@@ -2,13 +2,20 @@ import pandas as pd
 import ast
 import os
 import re
+import csv
+
 
 # Get all the csv files in the directory
 result_files = [f for f in os.listdir('zero_shot_results') if f.endswith('.csv')]
+pd.set_option('display.max_rows', None)
 
 for file in result_files:
     df = pd.read_csv(os.path.join('zero_shot_results', file))
-    df = df.iloc[:10]  
+    print(file)
+    df['question'] = df['question'].apply(lambda x: re.sub(r'\W|\n', ' ', str(x)).lower())
+    df['description'] = df['description'].apply(lambda x: re.sub(r'\W|\n', ' ', str(x)).lower())
+    df['options'] = df['options'].apply(lambda x: x.lower())
+    df = df.iloc[:100]
     df['proper'] = False
     df = df.fillna("n a")
 
@@ -16,20 +23,22 @@ for file in result_files:
     df['response'] = df['response'].apply(lambda x: re.sub(r'\W|\n', ' ', str(x)).lower())
 
     for i, row in df.iterrows():
-        response_words = row['response'].split()
+        response = row['response']
         options = ast.literal_eval(row['options'])
 
-        if len(response_words) > 1 and response_words[0] == 'outcome':
-            for option in options:
-                if row['response'].find(option.lower()) != -1:
-                    df.at[i, 'proper'] = True
-    # Manually annotate the improper responses to try to salvage something
-    for i, row in df[(df['proper'] == False) & (df['response'] != "n a")].iterrows():
-        print(f"Question: {row['question']}")
-        print(f"Options: {row['options']}")
-        print(f"Current response: {row['response']}")
-        new_response = input("Enter new response: ")
-        df.at[i, 'response'] = new_response
+        for option in options:
+            if response.startswith('outcome ' + option):
+                df.at[i, 'proper'] = True
+                df.at[i, 'response'] = "outcome " + option
+            else:
+                # For improper rows we still search the options and replace with a proper response
+                if options[0] in response and options[1] not in response:
+                    df.at[i, 'response'] = "outcome " + options[0]
+                elif options[1] in response and options[0] not in response:
+                    df.at[i, 'response'] = "outcome " + options[1]
+                else:
+                    df.at[i, 'response'] = "n a"
+
 
     df.to_csv(os.path.join('zero_shot_results', file), index=False)
     
